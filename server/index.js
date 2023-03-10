@@ -21,6 +21,19 @@ app.get("/api/get_menu", (req, res) => {
     });
 });
 
+app.post("/api/submit_order", (req, res) => {
+    // TODO: validate the data
+    const order_info = req.json()
+    const jsonString = JSON.stringify(order_info)
+    fs.writeFile('./orders.json', jsonString, err => {
+        if (err) {
+            console.log('Error writing into orders', err)
+        } else {
+            console.log('Successfully submitted order')
+        }
+    })
+});
+
 app.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`);
 });

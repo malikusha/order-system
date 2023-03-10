@@ -7,6 +7,22 @@
   pointer-events: none;
 }
 
+.ui.image {
+  max-height: 120px;
+}
+
+.crop-images {
+  object-fit: cover
+}
+
+.OuterMargin {
+  margin: 2%;
+}
+
+.ItemsInCategory {
+  height: 100%
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
