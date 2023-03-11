@@ -1,5 +1,6 @@
 import React from "react";
-import { Input, Menu, Segment, Container, Button, Image, List, Icon, Popup, Grid } from 'semantic-ui-react'
+import { Link } from 'react-router-dom'
+import { Menu, Segment, Container, Button, Image, List, Popup, Grid } from 'semantic-ui-react'
 import "semantic-ui-css/semantic.min.css"
 import "./App.css";
 
@@ -12,7 +13,7 @@ class App extends React.Component {
     items: {}
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     fetch("/api/get_menu")
       .then((res) => res.json())
       .then((data) => {
@@ -29,7 +30,7 @@ class App extends React.Component {
           new_categories[item.category_id].items.push(item)
           new_items[item.id] = item
         });
-        this.setState({menu: new_categories, items: new_items})
+        this.setState({ menu: new_categories, items: new_items })
         console.log(new_categories, new_items)
       });
   }
@@ -43,7 +44,7 @@ class App extends React.Component {
     if (item_id in new_cart) {
       new_cart[item_id].count++
     } else {
-      new_cart[item_id] = {count: 1, name: this.state.items[item_id].name, price: this.state.items[item_id].price}
+      new_cart[item_id] = { count: 1, name: this.state.items[item_id].name, price: this.state.items[item_id].price }
     }
     this.setState({ cart: new_cart })
     console.log(this.state.cart)
@@ -61,100 +62,102 @@ class App extends React.Component {
 
   renderCart(cart) {
     var total = 0
-    
-    localStorage.setItem('cart_info', JSON.stringify(cart));
-    // console.log(JSON.parse(localStorage.getItem('cart_info')))
 
-    return <div><List divided style={{'maxWidth':400, 'minWidth':200}}>
-      { 
+    localStorage.setItem('cart_info', JSON.stringify(cart));
+
+    return <div><List divided style={{ 'maxWidth': 400, 'minWidth': 200 }}>
+      {
         Object.keys(cart).map((key) => {
-          total = total+cart[key].count*cart[key].price
+          total = total + cart[key].count * cart[key].price
           return (
             <List.Item>
               <List.Content>
                 <Grid columns="equal">
                   <Grid.Column>
-                    <Button onClick={(e) => this.subtractFromCart(key,e)} icon="minus"></Button>
+                    <Button onClick={(e) => this.subtractFromCart(key, e)} icon="minus"></Button>
                   </Grid.Column>
                   <Grid.Column>
-                    <p style={{textAlign: "center"}}>{cart[key].count}</p>
+                    <p style={{ textAlign: "center" }}>{cart[key].count}</p>
                   </Grid.Column>
                   <Grid.Column>
-                    <Button onClick={(e) => this.addToCart(key,e)} icon="plus"></Button>
+                    <Button onClick={(e) => this.addToCart(key, e)} icon="plus"></Button>
                   </Grid.Column>
                 </Grid>
               </List.Content>
-              <List.Content style={{'fontSize':20}}>{cart[key].name}</List.Content>
+              <List.Content style={{ 'fontSize': 20 }}>{cart[key].name}</List.Content>
             </List.Item>
           );
-        }) 
+        })
       }
     </List>
-    <div>Your total is: ${total}</div>
-    {!total ? null : <Button className="center-div-horizontally" circular color='red' content='Checkout' />}
+      <div>Your total is: ${total}</div>
+      {!total ? null : <Link to='/checkout'><Button className="center-div-horizontally" circular color='red' content='Checkout' /></Link>}
     </div>
   }
-  
-  render() {
-    const {menu, activeItem, cart, items} = this.state
 
-    const itemsList = (
-      <Container className="OuterMargin">
-        <List divided style={{'maxWidth':'50%'}} floated='left' size="massive" verticalAlign='middle'>
-          { 
-            (!Object.keys(menu).length) ? (null) :
+  renderItemsPerCategory(menu, activeItem) {
+    return <Container className="OuterMargin">
+      <List divided style={{ 'maxWidth': '50%' }} floated='left' size="massive" verticalAlign='middle'>
+        {
+          (!Object.keys(menu).length) ? (null) :
             menu[activeItem].items.map((item) => {
               return (
-                <List.Item style={{'margin':20}} key={item.id}>
+                <List.Item style={{ 'margin': 20 }} key={item.id}>
                   <List.Content floated='right'>
-                    <Button onClick={(e) => this.addToCart(item.id,e)}>Add to Cart</Button>
+                    <Button onClick={(e) => this.addToCart(item.id, e)}>Add to Cart</Button>
                   </List.Content>
                   <Image alt="" floated='left' className="crop-images" size="small" src={require(`./images/${item.image_id}.jpg`)} />
-                  <List.Content floated='left' style={{'fontSize':20}}>{item.name}</List.Content>
-                  <List.Content floated='left' style={{'fontSize':20}}>${item.price}</List.Content>
+                  <List.Content floated='left' style={{ 'fontSize': 20 }}>{item.name}</List.Content>
+                  <List.Content floated='left' style={{ 'fontSize': 20 }}>${item.price}</List.Content>
                 </List.Item>
               );
-            }) 
-          }
-        </List>
-      </Container>
-    ) 
+            })
+        }
+      </List>
+    </Container>
+  }
+
+  render() {
+    const { menu, activeItem, cart } = this.state
 
     return (
       <div className="App">
         <div className="OuterMargin">
           <Menu attached='top' tabular>
-            { 
-              Object.keys(menu).map((key, index) => {
+
+            {
+              Object.keys(menu).map((key) => {
                 return (
-                  <Menu.Item key={key} name={menu[key].name} active={activeItem === key} onClick={(e) => this.handleItemClick(key,e)}>
-                    <Image avatar className="crop-images" style={{'fontSize':30}}  alt="" src={require(`./images/${menu[key].image}.jpg`)} />
+                  <Menu.Item key={key} name={menu[key].name} active={activeItem === key} onClick={(e) => this.handleItemClick(key, e)}>
+                    <Image avatar className="crop-images" style={{ 'fontSize': 30 }} alt="" src={require(`./images/${menu[key].image}.jpg`)} />
                     <List.Content floated='bottom'>{menu[key].name}</List.Content>
                   </Menu.Item>
                 );
-              }) 
+              })
             }
+
             <Menu.Menu position='right'>
               <Menu.Item>
                 <Popup
                   trigger={
                     <Button color='green' icon='shopping cart' content='Your Cart' />
                   }
-                  content={this.renderCart(cart)}
+                  content={
+
+                    this.renderCart(cart)
+
+                  }
                   on='click'
                   position='bottom left'
                 />
               </Menu.Item>
             </Menu.Menu>
           </Menu>
-          {(!Object.keys(menu).length) 
-            ? (<Segment loading>
-                <Image src='https://react.semantic-ui.com/images/wireframe/paragraph.png' />
-              </Segment>) 
-            : (<Segment basic className="ItemsInCategory" >
-                {itemsList}
-              </Segment>)
-          }
+          <Segment basic className="ItemsInCategory" >
+
+            {this.renderItemsPerCategory(menu, activeItem)}
+
+          </Segment>
         </div>
       </div>
     );
