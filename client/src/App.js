@@ -130,7 +130,7 @@ class App extends React.Component {
                 return (
                   <Menu.Item key={key} name={menu[key].name} active={activeItem === key} onClick={(e) => this.handleItemClick(key, e)}>
                     <Image avatar className="crop-images" style={{ 'fontSize': 30 }} alt="" src={require(`./images/${menu[key].image}.jpg`)} />
-                    <List.Content floated='bottom'>{menu[key].name}</List.Content>
+                    <List.Content>{menu[key].name}</List.Content>
                   </Menu.Item>
                 );
               })

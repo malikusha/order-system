@@ -55,7 +55,7 @@ class Checkout extends React.Component {
                     Object.keys(cart).map((key) => {
                         total = total + cart[key].count * cart[key].price
                         return (
-                            <List.Item>
+                            <List.Item key={key}>
                                 <List.Content style={{ 'fontSize': 20 }}>{cart[key].count}x{cart[key].name}</List.Content>
                             </List.Item>
                         );
@@ -78,7 +78,7 @@ class Checkout extends React.Component {
                         </Grid.Column>
                         <Grid.Column >
                             <Form>
-                                <Form.Group stackable widths={2}>
+                                <Form.Group widths={2}>
                                     <Form.Input label='Full Name' placeholder='Name on Card' />
                                     <Form.Input label='Card Number' placeholder='Card Number' />
                                     <Form.Input label='Month' placeholder='MM' width={3} />
