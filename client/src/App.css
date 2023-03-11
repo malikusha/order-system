@@ -11,6 +11,11 @@
   max-height: 120px;
 }
 
+.center-div-horizontally {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .crop-images {
   object-fit: cover
 }

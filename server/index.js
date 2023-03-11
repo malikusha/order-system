@@ -23,15 +23,21 @@ app.get("/api/get_menu", (req, res) => {
 
 app.post("/api/submit_order", (req, res) => {
     // TODO: validate the data
-    const order_info = req.json()
+    // check('id_token').isLength({ min: 1 }),
+    // check('price_id').isLength({ max: 60 })
+    // const { id_token, price_id } = req.body
+    const { order_info } = req.body
     const jsonString = JSON.stringify(order_info)
     fs.writeFile('./orders.json', jsonString, err => {
         if (err) {
             console.log('Error writing into orders', err)
+            // return res.status(401).json({errors: })
         } else {
             console.log('Successfully submitted order')
+            res.status(200).send();
         }
     })
+    
 });
 
 app.listen(PORT, () => {
