@@ -5,6 +5,10 @@ const PORT = process.env.PORT || 3001;
 
 const app = express();
 
+// middleware
+app.use(express.json());
+app.use(express.urlencoded());
+
 app.get("/api/get_menu", (req, res) => {
     fs.readFile("./menu.json", "utf8", (err, jsonString) => {
         if (err) {
@@ -13,7 +17,6 @@ app.get("/api/get_menu", (req, res) => {
         }
         try {
           const menu = JSON.parse(jsonString);
-          console.log("Menu categories:", menu.categories); 
           res.json({ menu });
         } catch (err) {
           console.log("Error parsing JSON string:", err);
@@ -25,7 +28,6 @@ app.post("/api/submit_order", (req, res) => {
     // TODO: validate the data
     // check('id_token').isLength({ min: 1 }),
     // check('price_id').isLength({ max: 60 })
-    // const { id_token, price_id } = req.body
     const { order_info } = req.body
     const jsonString = JSON.stringify(order_info)
     fs.writeFile('./orders.json', jsonString, err => {
