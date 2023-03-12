@@ -24,6 +24,7 @@ class App extends React.Component {
       const data = res.data
       var new_items = []
       var new_categories = {}
+      console.log("data", data)
       data.menu.categories.forEach(category => {
         new_categories[category.id] = {
           name: category.name,

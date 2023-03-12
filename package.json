@@ -11,9 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
+    "express-validator": "^6.15.0",
     "yarn": "^1.22.19"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/malikusha/order-system.git"

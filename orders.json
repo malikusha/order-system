@@ -1,1 +1,29 @@
-{"paymentInfo":{"name":"fgdgfdgfdg","cardNumber":"1234567890123456","expiration_date":["12","23"],"code":"123","address":"sadzff","state":"szfafs","zip":"12345"},"orderTotal":4,"items":[{"item_id":1,"count":2}]}
+[
+    {
+        "paymentInfo": {
+            "name": "Gloria Steinem",
+            "cardNumber": 1234567890123456,
+            "month": 12,
+            "year": 23,
+            "code": 123,
+            "address": "70 Liberation Way, Apt 8, Seneca Falls",
+            "state": "NY",
+            "zip": "13148"
+        },
+        "orderTotal": 16.95,
+        "items": [
+            {
+                "item_id": 1,
+                "count": 1
+            },
+            {
+                "item_id": 8,
+                "count": 1
+            },
+            {
+                "item_id": 10,
+                "count": 2
+            }
+        ]
+    }
+]

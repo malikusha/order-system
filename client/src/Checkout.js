@@ -102,7 +102,8 @@ class Checkout extends React.Component {
         const paymentObject = {
             name: name,
             cardNumber: cardNumber,
-            expiration_date: [month, year],
+            month: month,
+            year: year,
             code: code,
             address: address,
             state: state,
