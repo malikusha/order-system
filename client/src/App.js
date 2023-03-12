@@ -11,7 +11,7 @@ class App extends React.Component {
   state = {
     menu: {},
     activeItem: '1',
-    cart: JSON.parse(localStorage.getItem('cart_info')),
+    cart: JSON.parse(localStorage.getItem('cart_info')) == null ? {} : JSON.parse(localStorage.getItem('cart_info')),
     items: {},
     errorMessage: ''
   }
@@ -75,10 +75,12 @@ class App extends React.Component {
   renderCart(cart) {
     var total = 0
 
-    localStorage.setItem('cart_info', JSON.stringify(cart));
+    if (cart) {
+      localStorage.setItem('cart_info', JSON.stringify(cart));
+    }
 
     return <div><List divided style={{ 'maxWidth': 400, 'minWidth': 200 }}>
-      {
+      { cart == null ? null :
         Object.keys(cart).map((key) => {
           total = total + cart[key].count * cart[key].price
           return (
