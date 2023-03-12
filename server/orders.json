@@ -25,5 +25,32 @@
                 "count": 2
             }
         ]
+    },
+    {
+        "paymentInfo": {
+            "name": "Ada Lovelace",
+            "cardNumber": 1234567890098765,
+            "month": 6,
+            "year": 27,
+            "code": 156,
+            "address": "41 One Way",
+            "state": "CA",
+            "zip": "94105"
+        },
+        "orderTotal": 4.25,
+        "items": [
+            {
+                "item_id": 1,
+                "count": 1
+            },
+            {
+                "item_id": 2,
+                "count": 1
+            },
+            {
+                "item_id": 3,
+                "count": 1
+            }
+        ]
     }
 ]
