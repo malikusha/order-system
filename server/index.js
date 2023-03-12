@@ -68,11 +68,6 @@ app.post("/api/submit_order",
     validate,
     (req, res) => {
 
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //     return res.status(400).json({ errors: errors.array() });
-    // }
-
     const { order_info } = req.body
 
     if (!order_info.items) {
@@ -80,7 +75,7 @@ app.post("/api/submit_order",
     }
 
     var total = 0
-    // check if all the items exist in the current menu and if total adds up 
+    // check if all the items exist in the current menu and if total adds up        
     order_info.items.forEach(item => {
         const itemPrice = findItemPrice(item.item_id)
         if (itemPrice === null) {
@@ -93,9 +88,14 @@ app.post("/api/submit_order",
         return res.status(400).json({ errors: "The order total seems to be incorrect" });
     }
 
-    addOrder(order_info)
-
-    return res.sendStatus(200);    
+    try {
+        addOrder(order_info)
+        return res.sendStatus(200);  
+    } catch (err) {
+        console.log("Error while writing into the file", err)
+        return res.status(401).json({ errors: "Error while processing the order" });
+    }
+ 
 });
 
 app.listen(PORT, () => {
