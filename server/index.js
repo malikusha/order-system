@@ -17,7 +17,7 @@ app.get("/api/get_menu", (req, res) => {
         }
         try {
           const menu = JSON.parse(jsonString);
-          res.json({ menu });
+          res.status(201).json({status: 201, menu})
         } catch (err) {
           console.log("Error parsing JSON string:", err);
         }
@@ -36,7 +36,7 @@ app.post("/api/submit_order", (req, res) => {
             // return res.status(401).json({errors: })
         } else {
             console.log('Successfully submitted order')
-            res.status(200).send();
+            return res.sendStatus(200);
         }
     })
     

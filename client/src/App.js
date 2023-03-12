@@ -1,38 +1,49 @@
 import React from "react";
+import axios from 'axios';
 import { Link } from 'react-router-dom'
 import { Menu, Segment, Container, Button, Image, List, Popup, Grid } from 'semantic-ui-react'
 import "semantic-ui-css/semantic.min.css"
 import "./App.css";
 
+const TIMEOUT = 50 * 1000
 
 class App extends React.Component {
   state = {
     menu: {},
     activeItem: '1',
     cart: JSON.parse(localStorage.getItem('cart_info')),
-    items: {}
+    items: {},
+    errorMessage: ''
   }
 
   async componentDidMount() {
-    fetch("/api/get_menu")
-      .then((res) => res.json())
-      .then((data) => {
-        var new_items = []
-        var new_categories = {}
-        data.menu.categories.forEach(category => {
-          new_categories[category.id] = {
-            name: category.name,
-            image: category.image_id,
-            items: []
-          }
-        });
-        data.menu.items.forEach(item => {
-          new_categories[item.category_id].items.push(item)
-          new_items[item.id] = item
-        });
-        this.setState({ menu: new_categories, items: new_items })
-        console.log(new_categories, new_items)
+    // TODO: when we have a bigger menu, we can also add a probable timeout handling, in case it takes too long to load the entire menu due to its size
+    // for now, we know that menu is short enough, i.e. if it takes longer to load, then we know something is wrong
+    try {
+      const res = await axios.get("/api/get_menu", {timeout: TIMEOUT})
+      const data = res.data
+      var new_items = []
+      var new_categories = {}
+      data.menu.categories.forEach(category => {
+        new_categories[category.id] = {
+          name: category.name,
+          image: category.image_id,
+          items: []
+        }
       });
+      data.menu.items.forEach(item => {
+        new_categories[item.category_id].items.push(item)
+        new_items[item.id] = item
+      });
+      this.setState({ menu: new_categories, items: new_items, errorMessage: '' })
+    } catch (err) {
+        console.log(err)
+        if (err.message.includes('timeout')) {
+            this.setState({ errorMessage: "This took too long, something went wrong. Please try again later."})     
+        } else {
+            this.setState({ errorMessage: "Uh-oh! Something went wrong. Try again. "+err.message})
+        }
+    } 
   }
 
   handleItemClick = (key, event) => {
@@ -70,7 +81,7 @@ class App extends React.Component {
         Object.keys(cart).map((key) => {
           total = total + cart[key].count * cart[key].price
           return (
-            <List.Item>
+            <List.Item key={key}>
               <List.Content>
                 <Grid columns="equal">
                   <Grid.Column>
@@ -97,7 +108,7 @@ class App extends React.Component {
 
   renderItemsPerCategory(menu, activeItem) {
     return <Container className="OuterMargin">
-      <List divided style={{ 'maxWidth': '50%' }} floated='left' size="massive" verticalAlign='middle'>
+      <List divided style={{ 'maxWidth': '60%' }} floated='left' size="massive" verticalAlign='middle'>
         {
           (!Object.keys(menu).length) ? (null) :
             menu[activeItem].items.map((item) => {

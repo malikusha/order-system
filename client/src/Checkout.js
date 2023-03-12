@@ -2,7 +2,9 @@ import React from "react";
 import axios from 'axios';
 import "semantic-ui-css/semantic.min.css"
 import { Link } from 'react-router-dom'
-import { List, Grid, Container, Form, Icon } from 'semantic-ui-react'
+import { List, Grid, Container, Form, Icon, Message} from 'semantic-ui-react'
+
+const TIMEOUT = 20 * 1000
 
 class Checkout extends React.Component {
 
@@ -16,11 +18,87 @@ class Checkout extends React.Component {
         code: '', 
         address: '', 
         state: '', 
-        zip: ''
+        zip: '',
+        errorMessage: '',
+        warningMessage: '',
+        warningList: [],
+        success: ''
     }
 
-    handleSubmit = () => {
+    // validate the input
+    validateFormInput() {
+        const {name, cardNumber, month, year, code, address, state, zip} = this.state
+        const allInputs = {name, cardNumber, month, year, code, address, state, zip}
+        var inputWrong = false
+        var inputErrors = []
+        Object.entries(allInputs).forEach(([inputName, inputValue]) => {
+            switch ([inputName][0]) {
+                case 'name': // cant be empty
+                    if (inputValue.length > 0 && inputValue.length < 1200) {
+                    } else {
+                        inputWrong = true
+                        inputErrors.push("Full Name")
+                    }
+                    break
+                case 'cardNumber': // has to be 16-digits 
+                    if (inputValue.length !== 16 && parseInt(inputValue) !== NaN) {
+                        inputWrong = true 
+                        inputErrors.push("Card Number")
+                    }
+                    break
+                case 'month': // has to be 2-digits in range from 01 to 12
+                    if (inputValue.length === 2 && parseInt(inputValue) > 0 && parseInt(inputValue) < 13) {
+                    } else {
+                        inputWrong = true
+                        inputErrors.push("Month")
+                    }
+                    break
+                case 'year': // has to be 2-digits 
+                    // TODO: currently not checking based on the month and year, so all the past months within current year would not throw an input error
+                    if (inputValue.length === 2 && parseInt(inputValue) > 22 && parseInt(inputValue) !== NaN) {
+                    } else {
+                        inputWrong = true
+                        inputErrors.push("Year")
+                    }
+                    break
+                case 'code': // has to be 3-digits
+                    if (inputValue.length !== 3 && parseInt(inputValue) !== NaN) {
+                        inputWrong = true
+                        inputErrors.push("Code")
+                    }
+                    break
+                case 'address': // cant be empty
+                    if (!inputValue.length) {
+                        inputWrong = true
+                        inputErrors.push("Address")
+                    }
+                    break
+                case 'state': // cant be empty
+                    // TODO: replace with the dropdown for states
+                    if (!inputValue.length) {
+                        inputWrong = true
+                        inputErrors.push("State")
+                    }
+                    break
+                case 'zip': // has to be 5-digits, US zip codes only, support other countires in the future
+                    if (inputValue.length !== 5 && parseInt(inputValue) !== NaN) {
+                        inputWrong = true
+                        inputErrors.push("Zip code")
+                    }
+                    break
+                default:
+                  console.log("Hmm, that shouldnt happen");
+            }
+        });
+        this.setState({warningList: inputErrors, warningMessage: "Please check these fileds, they have a wrong format:"})
+        return !inputWrong
+    }
+
+    handleSubmit = async () => {
         const {cart, name, cardNumber, month, year, code, address, state, zip} = this.state
+        if (!this.validateFormInput()) {
+            return
+        }
         const paymentObject = {
             name: name,
             cardNumber: cardNumber,
@@ -33,27 +111,41 @@ class Checkout extends React.Component {
         var total = 0
         const itemsList = Object.keys(cart).map((item_id) => {
             total = total + cart[item_id].count * cart[item_id].price
-            return { item_id: item_id, count: cart[item_id].count }
+            return { item_id: parseInt(item_id), count: cart[item_id].count }
         })
         const orderInfo = {
             paymentInfo: paymentObject,
             orderTotal: total,
             items: itemsList
         }
-        console.log("total:", total, orderInfo)
-        axios.post("/api/submit_order", {
-            order_info: orderInfo
-        }).then((res) => res.json())
-            .then((resData) => {
-                console.log(resData)
-                // TODO: Update this.state.orderState and display the message
-                this.setState({ name: '', cardNumber: '', month: '', year: '', code: '', address: '', state: '', zip: '' })
-            });
+
+        try {
+            const res = await axios.post("/api/submit_order", {
+                order_info: orderInfo,
+                timeout: TIMEOUT
+            })
+            if (res.status === 200) {
+                this.setState({
+                    success: 'Your order will be ready for pickup in 10 minutes!', 
+                    errorMessage: '', 
+                    name: '', cardNumber: '', month: '', year: '', code: '', address: '', state: '', zip: ''
+                })
+                localStorage.setItem('cart_info', JSON.stringify({}));
+            }
+        } catch (err) {
+            if (err.message.includes('timeout')) {
+                this.setState({ success:'', errorMessage: "This took too long, something went wrong. Please try again later."})     
+            } else {
+                this.setState({ success:'', errorMessage: "Uh-oh! Something went wrong. Try again. "+err.message})
+            }
+        } 
     }
 
-    handleChange = (e, { name, value }) => this.setState({ [name]: value })
+    handleChange = (e, { name, value }) => {
+        this.setState({ [name]: value })
+    }
 
-    renderCartItems(cart) {
+    renderCartItems(cart, success) {
         var total = 0
 
         return <div>
@@ -70,21 +162,21 @@ class Checkout extends React.Component {
                 }
             </List>
             <div style={{ 'fontSize': 40, "marginBottom": 20 }}>Your total is: ${total}</div>
-            <Link to='/'><Icon name="left arrow" />Go back to modify your cart</Link>
+            <Link to='/'><Icon name="left arrow" />Go back to {!success.length ? "modify your cart" : "make another order"}</Link>
         </div>
     }
 
     render() {
-        const { cart, name, cardNumber, month, year, code, address, state, zip } = this.state
+        const { success, errorMessage, cart, name, cardNumber, month, year, code, address, state, zip, warningList, warningMessage } = this.state
         return (
             <Container style={{ "marginTop": 70 }}>
                 <Grid columns={2} divided>
                     <Grid.Row stretched>
                         <Grid.Column >
-                            <div>{this.renderCartItems(cart)}</div>
+                            <div>{this.renderCartItems(cart, success)}</div>
                         </Grid.Column>
                         <Grid.Column >
-                            <Form>
+                            <Form warning success error>
                                 <Form.Group>
                                     <Form.Input 
                                         label='Full Name' placeholder='Name on Card'
@@ -129,6 +221,24 @@ class Checkout extends React.Component {
                                         value={zip} 
                                         onChange={this.handleChange}/>
                                 </Form.Group>
+                                <Message
+                                    warning
+                                    header={warningMessage}
+                                    list={warningList}
+                                    hidden={!warningList.length}
+                                />
+                                <Message
+                                    success
+                                    header='Payment Completed'
+                                    content={success}
+                                    hidden={!success.length}
+                                />
+                                <Message
+                                    error
+                                    header=':('
+                                    content={errorMessage}
+                                    hidden={!errorMessage.length}
+                                />
                                 <Form.Button onClick={this.handleSubmit} content='Submit' color="blue"/>
                             </Form>
                         </Grid.Column>
